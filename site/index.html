@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="github-user" content="mudman1986" />
+    <meta name="github-repo" content="mudman1986" />
+    <title>mudman1986 | GitHub Pages</title>
+    <link rel="preconnect" href="https://api.github.com" crossorigin />
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="module" src="./app.js"></script>
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="hero-card">
+        <p class="eyebrow">GitHub Pages Hub</p>
+        <h1>@mudman1986</h1>
+        <p class="hero-copy">
+          A Linktree-style landing page that automatically lists public GitHub Pages projects from this account and supports pinned manual links.
+        </p>
+        <div class="hero-actions">
+          <a class="secondary-action" href="https://github.com/mudman1986" target="_blank" rel="noreferrer">GitHub profile</a>
+          <button id="refresh-button" class="secondary-action" type="button">Refresh links</button>
+        </div>
+      </section>
+
+      <section class="links-card">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">Published pages</p>
+            <h2>Projects</h2>
+          </div>
+          <p id="status-text" class="status-text" aria-live="polite">Loading links…</p>
+        </div>
+
+        <div id="links-container" class="links-grid" aria-live="polite"></div>
+      </section>
+    </main>
+  </body>
+</html>
