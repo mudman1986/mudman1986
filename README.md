@@ -21,4 +21,4 @@ This repository also publishes a GitHub Pages landing page from `/site`.
 
 ### Updating pinned links
 
-Edit `/home/runner/work/mudman1986/mudman1986/site/manual-links.json` to add, remove, or rename static links.
+Edit `site/manual-links.json` to add, remove, or rename static links.

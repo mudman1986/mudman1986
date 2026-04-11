@@ -157,17 +157,30 @@ function renderLinks(links) {
       anchor.rel = 'noreferrer';
 
       const safeUrl = link.url.replace(/^https?:\/\//, '');
+      const header = document.createElement('div');
+      header.className = 'link-card-header';
 
-      anchor.innerHTML = `
-        <div class="link-card-header">
-          <h3>${link.title}</h3>
-          <span class="meta-pill">${link.source}</span>
-        </div>
-        <p>${link.description}</p>
-        <div class="link-card-footer">
-          <span class="link-url">${safeUrl}</span>
-        </div>
-      `;
+      const title = document.createElement('h3');
+      title.textContent = link.title;
+
+      const source = document.createElement('span');
+      source.className = 'meta-pill';
+      source.textContent = link.source;
+
+      header.append(title, source);
+
+      const description = document.createElement('p');
+      description.textContent = link.description;
+
+      const footer = document.createElement('div');
+      footer.className = 'link-card-footer';
+
+      const url = document.createElement('span');
+      url.className = 'link-url';
+      url.textContent = safeUrl;
+
+      footer.append(url);
+      anchor.append(header, description, footer);
 
       return anchor;
     }),
@@ -178,18 +191,32 @@ async function loadLinks() {
   refreshButton.disabled = true;
   setStatus('Loading links…');
 
-  try {
-    const [manualLinks, discoveredLinks] = await Promise.all([fetchManualLinks(), fetchPageRepositories()]);
-    const combinedLinks = mergeLinks(manualLinks, discoveredLinks);
-    renderLinks(combinedLinks);
-    setStatus(`Showing ${combinedLinks.length} link${combinedLinks.length === 1 ? '' : 's'}`);
-  } catch (error) {
-    console.error(error);
-    renderLinks([]);
-    setStatus('Unable to load GitHub Pages right now');
-  } finally {
-    refreshButton.disabled = false;
+  const [manualResult, discoveredResult] = await Promise.allSettled([fetchManualLinks(), fetchPageRepositories()]);
+  const manualLinks = manualResult.status === 'fulfilled' ? manualResult.value : [];
+  const discoveredLinks = discoveredResult.status === 'fulfilled' ? discoveredResult.value : [];
+
+  if (manualResult.status === 'rejected') {
+    console.error(manualResult.reason);
   }
+
+  if (discoveredResult.status === 'rejected') {
+    console.error(discoveredResult.reason);
+  }
+
+  const combinedLinks = mergeLinks(manualLinks, discoveredLinks);
+  renderLinks(combinedLinks);
+
+  if (combinedLinks.length && discoveredResult.status === 'rejected') {
+    setStatus(`Showing ${combinedLinks.length} pinned link${combinedLinks.length === 1 ? '' : 's'} while GitHub auto-discovery is unavailable`);
+  } else if (combinedLinks.length && manualResult.status === 'rejected') {
+    setStatus(`Showing ${combinedLinks.length} auto-detected link${combinedLinks.length === 1 ? '' : 's'}`);
+  } else if (combinedLinks.length) {
+    setStatus(`Showing ${combinedLinks.length} link${combinedLinks.length === 1 ? '' : 's'}`);
+  } else {
+    setStatus('Unable to load GitHub Pages right now');
+  }
+
+  refreshButton.disabled = false;
 }
 
 refreshButton.addEventListener('click', () => {
