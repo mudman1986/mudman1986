@@ -155,6 +155,7 @@ function renderLinks(links) {
       anchor.href = link.url;
       anchor.target = '_blank';
       anchor.rel = 'noreferrer';
+      anchor.title = `${link.title} — ${link.description}`;
 
       const safeUrl = link.url.replace(/^https?:\/\//, '');
       const header = document.createElement('div');
