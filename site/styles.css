@@ -135,7 +135,6 @@ button {
 .links-grid {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .link-card {
@@ -173,10 +172,18 @@ button {
   margin: 8px 0 0;
   color: var(--muted);
   line-height: 1.4;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  display: block;
+  max-height: calc(1.4em * 2);
   overflow: hidden;
+}
+
+@supports (-webkit-line-clamp: 2) {
+  .link-card p {
+    display: -webkit-box;
+    max-height: none;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
 }
 
 .link-card-footer {
@@ -212,6 +219,12 @@ button {
   text-align: center;
 }
 
+@media (min-width: 680px) {
+  .links-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 640px) {
   .page-shell {
     width: min(100vw - 20px, 720px);
@@ -231,9 +244,5 @@ button {
 
   .status-text {
     text-align: left;
-  }
-
-  .links-grid {
-    grid-template-columns: 1fr;
   }
 }
