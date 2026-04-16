@@ -66,7 +66,7 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = githubRequestTime
     });
   } catch (error) {
     if (error.name === 'AbortError') {
-      throw new Error(`Request timed out after ${timeoutMs}ms`);
+      throw new Error(`Request to ${url} timed out after ${timeoutMs}ms`, { cause: error });
     }
 
     throw error;
@@ -211,7 +211,9 @@ function renderLinks(links) {
 async function loadLinks() {
   setStatus('Loading known links…');
 
-  const discoveredLinksPromise = fetchPageRepositories();
+  const discoveredLinksPromise = fetchPageRepositories()
+    .then((value) => ({ status: 'fulfilled', value }))
+    .catch((reason) => ({ status: 'rejected', reason }));
   let manualLinks = [];
 
   try {
@@ -229,7 +231,13 @@ async function loadLinks() {
   }
 
   try {
-    const discoveredLinks = await discoveredLinksPromise;
+    const discoveredResult = await discoveredLinksPromise;
+
+    if (discoveredResult.status === 'rejected') {
+      throw discoveredResult.reason;
+    }
+
+    const discoveredLinks = discoveredResult.value;
     const combinedLinks = mergeLinks(manualLinks, discoveredLinks);
 
     renderLinks(combinedLinks);
