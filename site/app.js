@@ -2,9 +2,9 @@ const githubUser = document.querySelector('meta[name="github-user"]')?.content?.
 const githubRepo = document.querySelector('meta[name="github-repo"]')?.content?.trim();
 const linksContainer = document.getElementById('links-container');
 const statusText = document.getElementById('status-text');
-const refreshButton = document.getElementById('refresh-button');
 const apiBaseUrl = 'https://api.github.com';
 const manualLinksPath = './manual-links.json';
+const githubRequestTimeoutMs = 10000;
 
 function setStatus(message) {
   statusText.textContent = message;
@@ -55,6 +55,26 @@ async function fetchManualLinks() {
   return Array.isArray(payload.links) ? payload.links : [];
 }
 
+async function fetchWithTimeout(url, options = {}, timeoutMs = githubRequestTimeoutMs) {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error(`Request to ${url} timed out after ${timeoutMs}ms`, { cause: error });
+    }
+
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
+
 async function fetchPageRepositories() {
   if (!githubUser) {
     return [];
@@ -63,7 +83,7 @@ async function fetchPageRepositories() {
   const repositories = [];
 
   for (let page = 1; page <= 10; page += 1) {
-    const response = await fetch(`${apiBaseUrl}/users/${githubUser}/repos?per_page=100&page=${page}&sort=updated`, {
+    const response = await fetchWithTimeout(`${apiBaseUrl}/users/${githubUser}/repos?per_page=100&page=${page}&sort=updated`, {
       headers: {
         Accept: 'application/vnd.github+json',
       },
@@ -189,39 +209,54 @@ function renderLinks(links) {
 }
 
 async function loadLinks() {
-  refreshButton.disabled = true;
-  setStatus('Loading links…');
+  setStatus('Loading known links…');
 
-  const [manualResult, discoveredResult] = await Promise.allSettled([fetchManualLinks(), fetchPageRepositories()]);
-  const manualLinks = manualResult.status === 'fulfilled' ? manualResult.value : [];
-  const discoveredLinks = discoveredResult.status === 'fulfilled' ? discoveredResult.value : [];
+  const discoveredLinksPromise = fetchPageRepositories()
+    .then((value) => ({ status: 'fulfilled', value }))
+    .catch((reason) => ({ status: 'rejected', reason }));
+  let manualLinks = [];
 
-  if (manualResult.status === 'rejected') {
-    console.error(manualResult.reason);
+  try {
+    manualLinks = await fetchManualLinks();
+
+    if (manualLinks.length) {
+      renderLinks(mergeLinks(manualLinks, []));
+      setStatus(`Showing ${manualLinks.length} pinned link${manualLinks.length === 1 ? '' : 's'} while checking GitHub Pages…`);
+    } else {
+      setStatus('Checking GitHub Pages…');
+    }
+  } catch (error) {
+    console.error(error);
+    setStatus('Checking GitHub Pages…');
   }
 
-  if (discoveredResult.status === 'rejected') {
-    console.error(discoveredResult.reason);
-  }
+  try {
+    const discoveredResult = await discoveredLinksPromise;
 
-  const combinedLinks = mergeLinks(manualLinks, discoveredLinks);
-  renderLinks(combinedLinks);
+    if (discoveredResult.status === 'rejected') {
+      throw discoveredResult.reason;
+    }
 
-  if (combinedLinks.length && discoveredResult.status === 'rejected') {
-    setStatus(`Showing ${combinedLinks.length} pinned link${combinedLinks.length === 1 ? '' : 's'} while GitHub auto-discovery is unavailable`);
-  } else if (combinedLinks.length && manualResult.status === 'rejected') {
-    setStatus(`Showing ${combinedLinks.length} auto-detected link${combinedLinks.length === 1 ? '' : 's'}`);
-  } else if (combinedLinks.length) {
-    setStatus(`Showing ${combinedLinks.length} link${combinedLinks.length === 1 ? '' : 's'}`);
-  } else {
+    const discoveredLinks = discoveredResult.value;
+    const combinedLinks = mergeLinks(manualLinks, discoveredLinks);
+
+    renderLinks(combinedLinks);
+
+    if (combinedLinks.length) {
+      setStatus(`Showing ${combinedLinks.length} link${combinedLinks.length === 1 ? '' : 's'}`);
+    } else {
+      setStatus('No links found yet');
+    }
+  } catch (error) {
+    console.error(error);
+
+    if (manualLinks.length) {
+      setStatus(`Showing ${manualLinks.length} pinned link${manualLinks.length === 1 ? '' : 's'} while GitHub auto-discovery is unavailable`);
+      return;
+    }
+
     setStatus('Unable to load GitHub Pages right now');
   }
-
-  refreshButton.disabled = false;
 }
-
-refreshButton.addEventListener('click', () => {
-  loadLinks();
-});
 
 loadLinks();
