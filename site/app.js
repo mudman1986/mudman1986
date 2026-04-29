@@ -188,7 +188,6 @@ function renderLinks(links) {
       source.className = 'meta-pill';
       source.textContent = link.source === 'Auto-detected' ? 'Auto' : link.source;
       source.setAttribute('aria-label', link.source);
-      source.title = link.source;
 
       header.append(title, source);
 

@@ -10,6 +10,8 @@
   --subtle: #94a3b8;
   --primary: #7dd3fc;
   --primary-strong: #38bdf8;
+  --card-header-row-gap: 6px;
+  --card-header-column-gap: 8px;
   --pill-font-size: 0.72rem;
   --pill-letter-spacing: 0.08em;
   --shadow: 0 24px 60px rgba(8, 15, 28, 0.4);
@@ -160,7 +162,7 @@ button {
 .link-card-header {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 8px;
+  gap: var(--card-header-row-gap) var(--card-header-column-gap);
   align-items: flex-start;
   justify-content: space-between;
 }
