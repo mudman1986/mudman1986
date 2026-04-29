@@ -10,6 +10,11 @@
   --subtle: #94a3b8;
   --primary: #7dd3fc;
   --primary-strong: #38bdf8;
+  --card-title-min-flex-basis: 180px;
+  --card-header-row-gap: 6px;
+  --card-header-column-gap: 8px;
+  --pill-font-size: 0.72rem;
+  --pill-letter-spacing: 0.08em;
   --shadow: 0 24px 60px rgba(8, 15, 28, 0.4);
 }
 
@@ -158,7 +163,7 @@ button {
 .link-card-header {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--card-header-row-gap) var(--card-header-column-gap);
   align-items: center;
   justify-content: space-between;
 }
@@ -166,6 +171,8 @@ button {
 .link-card h3 {
   margin: 0;
   font-size: 1rem;
+  flex: 1 1 var(--card-title-min-flex-basis);
+  min-width: 0;
 }
 
 .link-card p {
@@ -204,11 +211,16 @@ button {
 .meta-pill {
   display: inline-flex;
   align-items: center;
-  min-height: 24px;
-  padding: 0 8px;
+  flex: 0 0 auto;
+  min-height: 20px;
+  padding: 0 7px;
   border-radius: 999px;
   background: rgba(125, 211, 252, 0.12);
   color: var(--primary);
+  font-size: var(--pill-font-size);
+  letter-spacing: var(--pill-letter-spacing);
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .empty-state {
