@@ -164,7 +164,7 @@ button {
   display: flex;
   flex-wrap: wrap;
   gap: var(--card-header-row-gap) var(--card-header-column-gap);
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
 }
 
