@@ -143,7 +143,9 @@ button {
 }
 
 .link-card {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   padding: 14px 16px;
   border-radius: 16px;
   text-decoration: none;
@@ -177,6 +179,7 @@ button {
 
 .link-card p {
   margin: 8px 0 0;
+  flex: 1 1 auto;
   color: var(--muted);
   line-height: 1.4;
   display: block;
