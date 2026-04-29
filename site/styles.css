@@ -10,6 +10,8 @@
   --subtle: #94a3b8;
   --primary: #7dd3fc;
   --primary-strong: #38bdf8;
+  --pill-font-size: 0.72rem;
+  --pill-letter-spacing: 0.08em;
   --shadow: 0 24px 60px rgba(8, 15, 28, 0.4);
 }
 
@@ -212,8 +214,8 @@ button {
   border-radius: 999px;
   background: rgba(125, 211, 252, 0.12);
   color: var(--primary);
-  font-size: 0.66rem;
-  letter-spacing: 0.1em;
+  font-size: var(--pill-font-size);
+  letter-spacing: var(--pill-letter-spacing);
   line-height: 1;
   white-space: nowrap;
 }
