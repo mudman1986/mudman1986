@@ -10,6 +10,7 @@
   --subtle: #94a3b8;
   --primary: #7dd3fc;
   --primary-strong: #38bdf8;
+  --card-title-min-flex-basis: 180px;
   --card-header-row-gap: 6px;
   --card-header-column-gap: 8px;
   --pill-font-size: 0.72rem;
@@ -170,7 +171,7 @@ button {
 .link-card h3 {
   margin: 0;
   font-size: 1rem;
-  flex: 1 1 180px;
+  flex: 1 1 var(--card-title-min-flex-basis);
   min-width: 0;
 }
 
